@@ -25,35 +25,43 @@ try {
     $questionsRaw = $stmtQ->fetchAll(PDO::FETCH_ASSOC);
 
     $questions = [];
-    foreach ($questionsRaw as $q) {
-        $qData = [
-            "Question_Id" => $q['Question_Id'],
-            "Statement" => $q['Statement'],
-            "Correct" => null,
-            "options" => []
-        ];
+foreach ($questionsRaw as $q) {
+    $qData = [
+        "Question_Id" => $q['Question_Id'],
+        "Statement"   => $q['Statement'],
+        "Correct"     => $q['Correct'],  // default för true_false & ordering
+        "options"     => []
+    ];
 
+    // Dessa typer använder options → match, mcq, fill_blank
+    if (in_array($exercise['Type'], ['mcq', 'match', 'fill_blank'])) {
+        $stmtO = $pdo->prepare("
+            SELECT Option_Id, Option_Text AS text, Is_Correct AS correct 
+            FROM question_options 
+            WHERE Question_Id=?
+        ");
+        $stmtO->execute([$q['Question_Id']]);
+        $qData['options'] = $stmtO->fetchAll(PDO::FETCH_ASSOC);
+
+        // För MCQ behåller vi "Correct" som text (som du gjort innan)
         if ($exercise['Type'] === 'mcq') {
-            // Hämta options
-            $stmtO = $pdo->prepare("SELECT Option_Id, Option_Text AS text, Is_Correct AS correct FROM question_options WHERE Question_Id=?");
-            $stmtO->execute([$q['Question_Id']]);
-            $options = $stmtO->fetchAll(PDO::FETCH_ASSOC);
-            $qData['options'] = $options;
-
-            // Sätt korrekt svar som text
-            foreach ($options as $opt) {
+            foreach ($qData['options'] as $opt) {
                 if ($opt['correct'] == 1) {
                     $qData['Correct'] = $opt['text'];
                     break;
                 }
             }
-        } else {
-            // true_false eller annat: använd Correct
-            $qData['Correct'] = $q['Correct'];
         }
-
-        $questions[] = $qData;
     }
+
+    // ordering ska ha numeric correct
+    if ($exercise['Type'] === 'ordering') {
+        $qData['Correct'] = intval($q['Correct']);
+    }
+
+    $questions[] = $qData;
+}
+
 
     // --- Hämta tilldelade klasser ---
     $stmtC = $pdo->prepare("

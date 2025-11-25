@@ -46,10 +46,22 @@ const editExercise = (ex) => {
 }
 
 const deleteExercise = async (exerciseId) => {
-  if (!confirm("Är du säker på att du vill ta bort övningen?")) return
-  await axios.post('http://localhost/fragesport/api/delete_exercise.php', { exercise_id: exerciseId }, { withCredentials: true })
-  loadExercises()
+  if (!confirm("Är du säker på att du vill ta bort övningen?")) return;
+  try {
+    const res = await axios.post('http://localhost/fragesport/api/delete_exercise.php', { exercise_id: exerciseId }, { withCredentials: true });
+    console.log("delete_exercise response:", res.data);
+    if (res.data.success) {
+      alert("Övningen har raderats.");
+      loadExercises();
+    } else {
+      alert("Fel: " + (res.data.message || "okänt fel"));
+    }
+  } catch (err) {
+    console.error("Network/error:", err);
+    alert("Nätverksfel eller serverfel. Kolla console och PHP error_log.");
+  }
 }
+
 
 const playExercise = (ex) => {
   router.push({ 
