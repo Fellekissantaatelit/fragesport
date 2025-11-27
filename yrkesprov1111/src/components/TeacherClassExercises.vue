@@ -8,7 +8,6 @@
         <div>
           <button class="btn btn-sm btn-primary me-2" @click="editExercise(ex)">Redigera</button>
           <button class="btn btn-sm btn-danger me-2" @click="deleteExercise(ex.Exercise_Id)">Ta bort</button>
-          <button class="btn btn-sm btn-secondary" @click="playExercise(ex)">Spela</button>
         </div>
       </div>
     </div>

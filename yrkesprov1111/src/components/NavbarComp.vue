@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar navbar-light bg-light p-3 shadow">
     <div class="container">
-      <router-link class="navbar-brand" to="/">Frågesport</router-link>
+      <router-link class="navbar-brand" to="/user-dashboard">Frågesport</router-link>
       <div>
         <router-link v-if="!isLoggedIn" class="btn btn-primary btn-sm" to="/">Login</router-link>
         <button v-if="isLoggedIn" class="btn btn-danger btn-sm" @click="logout">Logout</button>

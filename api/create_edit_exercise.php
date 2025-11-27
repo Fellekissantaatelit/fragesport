@@ -2,21 +2,6 @@
 require_once "Session.php";
 require_once "config.php";
 
-// --- CORS headers ---
-header("Access-Control-Allow-Origin: http://localhost:5173");
-header("Access-Control-Allow-Credentials: true");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-
-// --- Preflight request ---
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
-}
-
-// --- POST fortsätter ---
-header("Content-Type: application/json");
-
 // Kontrollera användare
 if (!isset($_SESSION['user']['id'])) {
     echo json_encode([
@@ -46,6 +31,9 @@ if (!$exerciseData) {
     exit;
 }
 
+// Säkerställ Max_XP
+$maxXP = isset($exerciseData["max_xp"]) ? (int)$exerciseData["max_xp"] : 25;
+
 try {
     $pdo->beginTransaction();
 
@@ -53,16 +41,16 @@ try {
 
     if ($exerciseId) {
         // --- Uppdatera övning ---
-        $stmt = $pdo->prepare("UPDATE exercises SET Title=?, Description=?, Type=? WHERE Exercise_Id=?");
-        $stmt->execute([$exerciseData["title"], $exerciseData["description"], $exerciseData["type"], $exerciseId]);
+        $stmt = $pdo->prepare("UPDATE exercises SET Title=?, Description=?, Type=?, Max_XP=? WHERE Exercise_Id=?");
+        $stmt->execute([$exerciseData["title"], $exerciseData["description"], $exerciseData["type"], $maxXP, $exerciseId]);
 
         // Ta bort gamla frågor och options
         $pdo->prepare("DELETE FROM question_options WHERE Question_Id IN (SELECT Question_Id FROM exercise_questions WHERE Exercise_Id=?)")->execute([$exerciseId]);
         $pdo->prepare("DELETE FROM exercise_questions WHERE Exercise_Id=?")->execute([$exerciseId]);
     } else {
         // --- Skapa ny övning ---
-        $stmt = $pdo->prepare("INSERT INTO exercises (Title, Description, Type, Created_By) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$exerciseData["title"], $exerciseData["description"], $exerciseData["type"], $_SESSION['user']['id']]);
+        $stmt = $pdo->prepare("INSERT INTO exercises (Title, Description, Type, Created_By, Max_XP) VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute([$exerciseData["title"], $exerciseData["description"], $exerciseData["type"], $_SESSION['user']['id'], $maxXP]);
         $exerciseId = $pdo->lastInsertId();
     }
 
@@ -93,7 +81,8 @@ try {
     echo json_encode([
         "success" => true,
         "message" => "Övning sparad!",
-        "exerciseId" => $exerciseId
+        "exerciseId" => $exerciseId,
+        "max_xp" => $maxXP
     ]);
 } catch (Exception $e) {
     $pdo->rollBack();

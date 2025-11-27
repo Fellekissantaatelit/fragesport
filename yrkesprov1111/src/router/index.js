@@ -19,7 +19,8 @@ const routes = [
 
   // User
   { path: '/user-dashboard', name: 'UserDashboard', component: Dashboard, meta: { requiresAuth: true, role: 1 } },
-  { path: '/play-exercise/:id', name: 'PlayExercise', component: PlayExercise, meta: { requiresAuth: true, role: 1 } },
+  { path: '/play-exercise', name: 'PlayExercise', component: PlayExercise, meta: { requiresAuth: true, role: 1 } },
+
 
   // Teacher
   { path: '/teacher-dashboard', name: 'TeacherDashboard', component: TeacherPanel, meta: { requiresAuth: true, role: 2 } },

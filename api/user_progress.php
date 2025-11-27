@@ -1,44 +1,58 @@
 <?php
-require_once "Session.php";
 require_once "config.php";
+require_once "Session.php";
 
-header("Content-Type: application/json");
-header("Access-Control-Allow-Origin: http://localhost:5173");
-header("Access-Control-Allow-Credentials: true");
-
-if (!isset($_SESSION['user'])) {
-    echo json_encode(["success" => false, "message" => "Inte inloggad"]);
+if (!isset($_SESSION['user']['id'])) {
+    echo json_encode(["success" => false, "message" => "Not logged in"]);
     exit;
 }
 
 $userId = $_SESSION['user']['id'];
 
-// Hämta totalpoäng (XP)
-$stmt = $pdo->prepare("SELECT xp FROM users WHERE u_id = ?");
-$stmt->execute([$userId]);
-$XP = $stmt->fetchColumn(); // returnerar bara xp-värdet
+try {
+    // 1. Total XP från users-tabellen
+    $stmt = $pdo->prepare("SELECT xp FROM users WHERE u_id = ?");
+    $stmt->execute([$userId]);
+    $totalXP = $stmt->fetchColumn() ?? 0;
 
-// Hämta senaste resultaten (t.ex. de 5 senaste)
-$stmt = $pdo->prepare("SELECT r.Score, r.Completed_At, e.Title 
-                       FROM user_results r
-                       JOIN exercises e ON r.Exercise_Id = e.Exercise_Id
-                       WHERE r.User_Id = ?
-                       ORDER BY r.Completed_At DESC
-                       LIMIT 5");
-$stmt->execute([$userId]);
-$recentResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // 2. Senaste resultat (user_results)
+    $stmt = $pdo->prepare("
+        SELECT ur.Exercise_Id AS exercise_id, ur.Score AS xp, ur.Completed_At AS completed_at, e.Title AS title
+        FROM user_results ur
+        JOIN exercises e ON ur.Exercise_Id = e.Exercise_Id
+        WHERE ur.User_Id = ?
+        ORDER BY ur.Completed_At DESC
+        LIMIT 5
+    ");
+    $stmt->execute([$userId]);
+    $recent = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Hämta achievements
-$stmt = $pdo->prepare("SELECT a.Title, a.Description, a.Icon
-                       FROM user_achievements ua
-                       JOIN achievements a ON ua.Achv_Id = a.Achv_Id
-                       WHERE ua.User_Id = ?");
-$stmt->execute([$userId]);
-$achievements = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // 3. Tillgängliga övningar (inte genomförda)
+    $stmt = $pdo->prepare("
+        SELECT e.Exercise_Id, e.Title, e.Description, e.Type
+        FROM class_exercises ce
+        JOIN exercises e ON ce.exercise_id = e.Exercise_Id
+        JOIN users u ON ce.class_id = u.class_id
+        WHERE u.u_id = ?
+        AND e.Exercise_Id NOT IN (
+            SELECT Exercise_Id FROM user_results WHERE User_Id = ?
+        )
+    ");
+    $stmt->execute([$userId, $userId]);
+    $available = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-echo json_encode([
-    "success" => true,
-    "XP" => $XP,
-    "recentResults" => $recentResults,
-    "achievements" => $achievements
-]);
+    // 4. Hämta levels från experience_levels-tabellen
+    $stmt = $pdo->query("SELECT Level_Id, Level_Name, XP_Required FROM experience_levels ORDER BY XP_Required ASC");
+    $levels = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    echo json_encode([
+        "success" => true,
+        "total_xp" => (int)$totalXP,
+        "recent_results" => $recent,
+        "available_exercises" => $available,
+        "levels" => $levels
+    ]);
+
+} catch (Exception $e) {
+    echo json_encode(["success" => false, "message" => $e->getMessage()]);
+}

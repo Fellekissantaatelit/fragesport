@@ -26,7 +26,11 @@
           <option value="fill_blank">Fyll i luckor</option>
         </select>
       </div>
-
+      <!-- Max XP -->
+      <div class="mb-3">
+        <label class="form-label">Max XP</label>
+        <input v-model.number="exercise.max_xp" type="number" class="form-control" min="1" required />
+      </div>
       <!-- Frågor -->
       <div class="mb-3">
         <label class="form-label">Frågor / Meningar</label>
@@ -87,7 +91,14 @@ import axios from "axios"
 const router = useRouter()
 const route = useRoute()
 
-const exercise = ref({ exercise_id: null, title: "", description: "", type: "true_false", questions: [] })
+const exercise = ref({ 
+  exercise_id: null,
+  title: "",
+  description: "",
+  type: "true_false",
+  max_xp: 25,   // <-- NYTT
+  questions: [] 
+})
 const classes = ref([])
 const selectedClasses = ref([])
 const isEdit = ref(false)
@@ -110,10 +121,11 @@ const loadExercise = async (id) => {
     const data = res.data.exercise
 
     exercise.value = {
-      exercise_id: data.Exercise_Id,
+       exercise_id: data.Exercise_Id,
       title: data.Title,
       description: data.Description,
       type: data.Type,
+      max_xp: data.Max_XP,
       questions: data.questions.map(q => {
         if (["mcq","match","fill_blank"].includes(data.Type)) {
     return { 

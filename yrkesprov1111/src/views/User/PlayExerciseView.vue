@@ -1,94 +1,150 @@
 <template>
-  <div class="container mt-4">
-    <h2>{{ exercise.Title }}</h2>
-    <p v-if="exercise.Description">{{ exercise.Description }}</p>
+  <div class="container mt-4" v-if="exercise">
+    <h3>{{ exercise.Title }}</h3>
+    <p>{{ exercise.Description }}</p>
 
-    <div v-if="loading">Laddar övning...</div>
-    <div v-else>
-      <form @submit.prevent="submitAnswers">
-        <div v-for="(q, index) in questions" :key="q.Question_Id" class="mb-3">
-          <p>{{ index + 1 }}. {{ q.Statement }}</p>
+    <!-- Frågeindikator -->
+    <p class="text-muted">Fråga {{ currentIndex + 1 }} av {{ exercise.questions.length }}</p>
 
-          <!-- Flervals -->
-          <div v-if="exercise.Type === 'mcq'">
-            <div v-for="opt in q.options" :key="opt.Option_Id" class="form-check">
-              <input class="form-check-input" type="radio" :name="'q' + q.Question_Id" :value="opt.Option_Id" v-model="answers[q.Question_Id]" />
-              <label class="form-check-label">{{ opt.Option_Text }}</label>
-            </div>
-          </div>
-
-          <!-- Sant/Falskt -->
-          <div v-if="exercise.Type === 'true_false'">
-            <div class="form-check">
-              <input class="form-check-input" type="radio" :name="'q' + q.Question_Id" value="1" v-model="answers[q.Question_Id]" />
-              <label class="form-check-label">Sant</label>
-            </div>
-            <div class="form-check">
-              <input class="form-check-input" type="radio" :name="'q' + q.Question_Id" value="0" v-model="answers[q.Question_Id]" />
-              <label class="form-check-label">Falskt</label>
-            </div>
-          </div>
-
-          <!-- Ordering / Fill-in kan utökas senare -->
-        </div>
-
-        <button class="btn btn-primary" type="submit">Skicka svar</button>
-      </form>
-
-      <div v-if="score !== null" class="mt-3">
-        <p>Du fick {{ score }} poäng!</p>
-      </div>
+    <!-- Nuvarande fråga -->
+    <div v-if="currentQuestion" class="mb-3 p-3 border rounded bg-light">
+      <component
+        :is="questionComponent(currentQuestion.Type)"
+        :question="currentQuestion"
+        :model-value="answers[currentQuestion.Question_Id]"
+        @update:modelValue="val => saveAnswer(currentQuestion.Question_Id, val)"
+      />
     </div>
+
+    <!-- Navigering -->
+    <div class="d-flex gap-2 mb-3">
+      <button class="btn btn-secondary" @click="prevQuestion" :disabled="currentIndex === 0">Föregående</button>
+      <button class="btn btn-primary" @click="nextQuestion" :disabled="currentIndex === exercise.questions.length - 1">Nästa</button>
+      <button class="btn btn-success ms-auto" v-if="currentIndex === exercise.questions.length - 1" @click="submitExercise">Slutför</button>
+    </div>
+
+    <!-- DEBUG-PANEL -->
+    <div class="p-3 border rounded bg-light">
+      <h5>Debug-panel</h5>
+      <p><strong>Nuvarande svar:</strong></p>
+      <pre>{{ answers }}</pre>
+      <p v-if="backendResponse"><strong>Backend-respons:</strong></p>
+      <pre v-if="backendResponse">{{ backendResponse }}</pre>
+    </div>
+  </div>
+
+  <div v-else class="text-center mt-4">
+    <p>Loading...</p>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import axios from 'axios'
 
+// Frågetyper
+import TrueFalseQuestion from '@/components/GameTypes/TrueFalseQuestion.vue'
+import MCQQuestion from '@/components/GameTypes/MCQQuestion.vue'
+import MatchQuestion from '@/components/GameTypes/MatchQuestion.vue'
+import OrderingQuestion from '@/components/GameTypes/OrderingQuestion.vue'
+import FillBlankQuestion from '@/components/GameTypes/FillBlankQuestion.vue'
+
 const route = useRoute()
-const router = useRouter()
-
-const exercise = ref({})
-const questions = ref([])
+const exercise = ref(null)
+const currentIndex = ref(0)
 const answers = ref({})
-const score = ref(null)
-const loading = ref(true)
+const backendResponse = ref(null)  // <-- För debug
 
-const fetchExercise = async () => {
+// Dynamisk komponentkarta
+const questionComponent = (type) => {
+  switch(type){
+    case 'true_false': return TrueFalseQuestion
+    case 'mcq': return MCQQuestion
+    case 'match': return MatchQuestion
+    case 'ordering': return OrderingQuestion
+    case 'fill_blank': return FillBlankQuestion
+    default: return null
+  }
+}
+
+// Nuvarande fråga
+const currentQuestion = computed(() => exercise.value?.questions[currentIndex.value] ?? null)
+
+// Ladda övning
+const loadExercise = async () => {
   try {
-    const res = await axios.get(`http://localhost/fragesport/api/get_exercise.php?id=${route.params.id}`, { withCredentials: true })
-    exercise.value = res.data.exercise
-    questions.value = res.data.questions
-    // Initiera svar-objekt
-    questions.value.forEach(q => { answers.value[q.Question_Id] = null })
-  } catch (err) {
+    const exerciseId = route.query.id
+    if(!exerciseId) return alert('Exercise ID saknas!')
+
+    const res = await axios.get(`http://localhost/fragesport/api/get_exercise.php?id=${exerciseId}`, { withCredentials: true })
+    console.log('get_exercise response:', res.data)
+    if(res.data.success){
+      exercise.value = res.data.exercise
+      exercise.value.questions = exercise.value.questions.map(q => ({
+        ...q,
+        Type: q.Type || exercise.value.Type,
+        options: q.options || [],
+        Correct: q.Correct ?? null
+      }))
+    } else {
+      alert(res.data.message)
+    }
+  } catch(err){
     console.error(err)
     alert('Fel vid hämtning av övning')
-    router.push('/user-dashboard')
-  } finally {
-    loading.value = false
   }
 }
 
-const submitAnswers = async () => {
+// Spara svar
+const saveAnswer = (questionId, answer) => {
+  answers.value[questionId] = answer
+  console.log('Sparade svar:', answers.value)
+}
+
+// Navigering
+const nextQuestion = () => {
+  if(currentIndex.value < exercise.value.questions.length - 1) currentIndex.value++
+}
+const prevQuestion = () => {
+  if(currentIndex.value > 0) currentIndex.value--
+}
+
+// Skicka svar
+const submitExercise = async () => {
+  if(!exercise.value) return
   try {
+    const classId = route.query.class_id
     const res = await axios.post('http://localhost/fragesport/api/submit_result.php', {
       exercise_id: exercise.value.Exercise_Id,
+      class_id: classId,
       answers: answers.value
     }, { withCredentials: true })
+    
+    console.log('submit_result response:', res.data)
+    backendResponse.value = res.data  
 
-    if (res.data.success) {
-      score.value = res.data.score
+    if(res.data.success){
+      alert(`Du fick ${res.data.xp_earned} XP! (${res.data.percent_correct}% korrekt)`)
     } else {
-      alert('Fel vid skickning av svar')
+      alert(res.data.message)
     }
-  } catch (err) {
+  } catch(err){
     console.error(err)
-    alert('Fel vid kontakt med servern')
+    alert('Fel vid skickande av svar')
   }
 }
 
-onMounted(fetchExercise)
+onMounted(loadExercise)
 </script>
+
+<style scoped>
+.container {
+  max-width: 800px;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+</style>

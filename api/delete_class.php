@@ -2,19 +2,6 @@
 require_once "Session.php";
 require_once "config.php";
 
-// --- Headers för CORS ---
-header("Content-Type: application/json");
-header("Access-Control-Allow-Origin: http://localhost:5173");
-header("Access-Control-Allow-Credentials: true");
-header("Access-Control-Allow-Methods: POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-
-// --- Hantera preflight ---
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
-}
-
 // --- Kontrollera om användare är inloggad ---
 if (!isset($_SESSION['user']['id'])) {
     echo json_encode([
