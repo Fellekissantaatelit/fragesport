@@ -1,35 +1,25 @@
 <template>
-  <div>
-    <p>{{ question.Statement }}</p>
+  <div class="ordering-container">
 
-    <ul class="list-group">
-      <li
-        v-for="(item, index) in items"
-        :key="item.Option_Id"
-        class="list-group-item d-flex justify-content-between align-items-center"
-      >
-        <span>{{ item.text }}</span>
+    <p class="instructions">Dra orden till rätt ordning:</p>
 
-        <div>
-          <button
-            class="btn btn-sm btn-secondary me-1"
-            @click="moveUp(index)"
-            :disabled="index === 0"
-          >↑</button>
-
-          <button
-            class="btn btn-sm btn-secondary"
-            @click="moveDown(index)"
-            :disabled="index === items.length - 1"
-          >↓</button>
-        </div>
+    <ul class="drag-list">
+      <li v-for="(opt, idx) in localOrder"
+          :key="opt.Option_Id"
+          class="drag-item"
+          draggable="true"
+          @dragstart="dragStart(idx)"
+          @dragover.prevent
+          @drop="dropItem(idx)">
+        {{ opt.text }}
       </li>
     </ul>
+
   </div>
 </template>
 
 <script setup>
-import { reactive, watch } from "vue"
+import { ref, watch } from "vue"
 
 const props = defineProps({
   question: Object,
@@ -38,39 +28,70 @@ const props = defineProps({
 
 const emit = defineEmits(["update:modelValue"])
 
-// Initiera items KORREKT → baserat på riktiga ID:n
-const items = reactive(
+// Start order from props OR default
+const localOrder = ref(
   props.modelValue?.length
-    ? props.question.options.filter(o => props.modelValue.includes(o.Option_Id))
-    : [...props.question.options] // originalordning
+    ? [...props.modelValue]
+    : [...props.question.options]
 )
 
-// Watch och skicka tillbaka korrekt ordning (ID-array)
-watch(
-  items,
-  () => {
-    emit(
-      "update:modelValue",
-      items.map(i => i.Option_Id)
-    )
-  },
-  { deep: true }
-)
+let draggedIndex = null
 
-// Flytta upp/ner
-const moveUp = (i) => {
-  if (i === 0) return
-  ;[items[i - 1], items[i]] = [items[i], items[i - 1]]
+const dragStart = (index) => {
+  draggedIndex = index
 }
 
-const moveDown = (i) => {
-  if (i === items.length - 1) return
-  ;[items[i], items[i + 1]] = [items[i + 1], items[i]]
+const dropItem = (dropIndex) => {
+  if (draggedIndex === null) return
+
+  const moved = localOrder.value.splice(draggedIndex, 1)[0]
+  localOrder.value.splice(dropIndex, 0, moved)
+
+  draggedIndex = null
+
+  // Send only Option_Id in final order
+  emit(
+    "update:modelValue",
+    localOrder.value.map(o => o.Option_Id)
+  )
 }
 </script>
 
 <style scoped>
-.list-group-item {
+.ordering-container {
+  text-align: center;
+}
+
+.instructions {
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.drag-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 auto;
+  width: 80%;
+}
+
+.drag-item {
+  background: #f7f7f9;
+  border: 2px solid #ddd;
+  padding: 12px;
+  margin-bottom: 8px;
+  border-radius: 10px;
   cursor: grab;
+  font-size: 1.1rem;
+  transition: transform 0.15s
+}
+
+.drag-item:active {
+  cursor: grabbing;
+}
+
+.drag-item:hover {
+  background: #e9f2ff;
+  transform: scale(1.02);
 }
 </style>
