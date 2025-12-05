@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 02, 2025 at 02:34 PM
+-- Generation Time: Dec 05, 2025 at 12:49 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -50,8 +50,7 @@ CREATE TABLE `class` (
 --
 
 INSERT INTO `class` (`class_id`, `class_name`) VALUES
-(1, 'Test25'),
-(2, 'Test1'),
+(1, 'Test2'),
 (3, 'test2');
 
 -- --------------------------------------------------------
@@ -72,11 +71,10 @@ CREATE TABLE `class_exercises` (
 --
 
 INSERT INTO `class_exercises` (`id`, `class_id`, `exercise_id`, `assigned_at`) VALUES
-(8, 2, 1, '2025-11-25 13:33:13'),
-(9, 3, 1, '2025-11-25 13:33:13'),
-(22, 1, 9, '2025-12-02 13:10:34'),
-(23, 1, 10, '2025-12-02 13:21:53'),
-(24, 1, 11, '2025-12-02 13:27:55');
+(46, 1, 58, '2025-12-05 10:32:48'),
+(47, 1, 57, '2025-12-05 10:32:54'),
+(48, 1, 55, '2025-12-05 10:33:04'),
+(53, 1, 63, '2025-12-05 11:00:51');
 
 -- --------------------------------------------------------
 
@@ -99,14 +97,14 @@ CREATE TABLE `exercises` (
 --
 
 INSERT INTO `exercises` (`Exercise_Id`, `Title`, `Description`, `Type`, `Max_XP`, `Is_Template`, `Created_By`) VALUES
-(1, 'Tågresan', 'Albin skulle åka tåg till sin mormor...', 'true_false', 0, 1, 4),
-(2, 'Lisa i affären', 'Lisa gick till affären för att köpa frukt.', 'mcq', 0, 1, NULL),
-(3, 'Den borttappade mössan', 'Sätt meningarna i rätt ordning.', 'ordering', 0, 1, NULL),
-(4, 'Para ihop begrepp', 'Matcha orden med rätt förklaring.', 'match', 0, 1, NULL),
-(5, 'Textluckor', 'Fyll i de ord som saknas i texten.', 'fill_blank', 0, 1, NULL),
-(9, 'Introtest', 'Detta är ett test och man får inte fuska om man fuskar så får man stryk', 'true_false', 80, 0, 4),
-(10, 'Älskling Test', 'Ett test för digg', 'true_false', 25, 0, 4),
-(11, 'Flera frågor älsklingtest', 'fdsbvojfsdbvpjisdfbp', 'mcq', 65, 0, 4);
+(54, 'Djurquiz 1', 'Sant/Falskt om djur.', 'true_false', 25, 1, NULL),
+(55, 'Väderfakta', 'Testa dina väderkunskaper!', 'true_false', 25, 1, NULL),
+(56, 'Historiska fakta', 'Hur mycket historia kan du?', 'true_false', 25, 1, NULL),
+(57, 'Geografi Quiz 1', 'Testa din kunskap om världen.', 'mcq', 30, 1, NULL),
+(58, 'Mat & Dryck Test', 'Vad vet du om mat och dryck?', 'mcq', 30, 1, NULL),
+(59, 'Djurarter Test', 'Vilket djur är vad?', 'mcq', 30, 1, NULL),
+(60, 'Morgondagen', 'Ordna stegen i rätt ordning.', 'ordering', 25, 1, NULL),
+(63, 'Recept: Pannkakor', 'Ordna receptet steg för steg.', 'ordering', 25, 0, 4);
 
 -- --------------------------------------------------------
 
@@ -126,26 +124,26 @@ CREATE TABLE `exercise_questions` (
 --
 
 INSERT INTO `exercise_questions` (`Question_Id`, `Exercise_Id`, `Statement`, `Correct`) VALUES
-(4, 2, 'Vilken frukt köpte Lisa?', NULL),
-(5, 3, 'Albin tappade sin mössa.', NULL),
-(6, 3, 'Han gick tillbaka till parken.', NULL),
-(7, 3, 'Han hittade mössan under bänken.', NULL),
-(8, 4, 'Hund = Djur som skäller.', NULL),
-(9, 4, 'Katt = Djur som jamar.', NULL),
-(10, 5, 'Det var en ____ dag i parken.', NULL),
-(11, 5, 'Barnen lekte med en ____ boll.', NULL),
-(20, 1, 'Albin reste tillsammans med sin mamma hela vägen.', 0),
-(21, 1, 'Albin satt bredvid en äldre dam som bjöd honom på karamell.', 1),
-(22, 1, 'Tågresan gick till Stockholm.', 0),
-(40, 9, 'är detta ett test?', 1),
-(41, 9, 'om man fuskar får man stryk', 1),
-(42, 10, 'Älskar du mig', 1),
-(43, 10, 'Älskar jag dig', 1),
-(44, 10, 'Kommer vi fara till Lojo idag', 1),
-(45, 10, 'Kommer du få en prilla', 0),
-(46, 11, 'Hur lång är FELIX KOPRANDER(älskling)', 1),
-(47, 11, 'hur stor e din säng', 0),
-(48, 11, 'Vad för bil Har jag', 1);
+(130, 54, 'En elefant kan väga över 5000 kg.', 1),
+(131, 54, 'En snigel kan springa 20 km/h.', 0),
+(132, 54, 'Delfiner är däggdjur.', 1),
+(133, 55, 'Tornados kan förekomma i Sverige.', 1),
+(134, 55, 'Regn bildas när luften blir varmare.', 0),
+(135, 55, 'Snö kan falla vid temperaturer över 0°C.', 0),
+(136, 56, 'Vikingar bar horn på sina hjälmar.', 0),
+(137, 56, 'Pyramiderna i Egypten är över 4000 år gamla.', 1),
+(138, 56, 'Den första mobiltelefonen kom på 1990-talet.', 0),
+(139, 57, 'Vilket är världens största hav?', 0),
+(140, 57, 'Vilket land har flest invånare?', 0),
+(141, 57, 'Vilken är Europas längsta flod?', 0),
+(142, 58, 'Vilken av dessa är en italiensk maträtt?', 0),
+(143, 58, 'Vilken dryck innehåller koffein?', 0),
+(144, 59, 'Vilket djur är ett däggdjur?', NULL),
+(145, 59, 'Vilket djur kan flyga?', NULL),
+(146, 60, 'Steg i morgonrutinen', 1),
+(158, 63, 'Först ägg', 1),
+(159, 63, 'sedan mjölk', 2),
+(160, 63, 'till sist mjöl', 3);
 
 -- --------------------------------------------------------
 
@@ -187,18 +185,30 @@ CREATE TABLE `question_options` (
 --
 
 INSERT INTO `question_options` (`Option_Id`, `Question_Id`, `Option_Text`, `Is_Correct`) VALUES
-(1, 4, 'Äpple', 1),
-(2, 4, 'Banan', 0),
-(3, 4, 'Apelsin', 0),
-(27, 46, '1,70cm', 0),
-(28, 46, '170cm', 0),
-(29, 46, '170mm', 0),
-(30, 47, '160cm x 200cm', 0),
-(31, 47, '11cm x 11cm', 0),
-(32, 47, 'exakta mått', 0),
-(33, 48, 'Audi A1', 0),
-(34, 48, 'Snålsniffarn', 0),
-(35, 48, 'Bmw', 0);
+(91, 139, 'Stilla havet', 1),
+(92, 139, 'Atlanten', 0),
+(93, 139, 'Indiska oceanen', 0),
+(94, 140, 'Kina', 1),
+(95, 140, 'Indien', 0),
+(96, 140, 'USA', 0),
+(97, 141, 'Volga', 1),
+(98, 141, 'Donau', 0),
+(99, 141, 'Rhen', 0),
+(100, 142, 'Lasagne', 1),
+(101, 142, 'Sushi', 0),
+(102, 142, 'Tacos', 0),
+(103, 143, 'Kaffe', 1),
+(104, 143, 'Mjölk', 0),
+(105, 143, 'Apelsinjuice', 0),
+(106, 144, 'Haj', 0),
+(107, 144, 'Hund', 1),
+(108, 144, 'Groda', 0),
+(109, 145, 'Häst', 0),
+(110, 145, 'Örn', 1),
+(111, 145, 'Pingvin', 0),
+(112, 146, 'Vakna', 1),
+(113, 146, 'Äta frukost', 2),
+(114, 146, 'Gå till skolan', 3);
 
 -- --------------------------------------------------------
 
@@ -238,7 +248,6 @@ CREATE TABLE `teacher_classes` (
 
 INSERT INTO `teacher_classes` (`id`, `teacher_id`, `class_id`) VALUES
 (1, 4, 1),
-(2, 5, 2),
 (3, 5, 3);
 
 -- --------------------------------------------------------
@@ -264,7 +273,7 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`u_id`, `username`, `email`, `password`, `role_id`, `xp`, `class_id`, `created_at`) VALUES
 (2, 'Admin', 'admin@g.fi', '$2y$10$9O/r042xv477DkWp2twlz.wH5ovc5/0p1PaHYF3l1IbJV.Mt7.t9u', 3, 0, NULL, '2025-11-11 10:10:21'),
-(3, 'TestElev', 'TestElev@test.fi', '$2y$10$Xyp7Cc8BBLuFKe9ObZy1v.mGzDZqG2vrKwjcvqbeYI9pHiHhgrD0G', 1, 215, 1, '2025-11-14 11:44:03'),
+(3, 'TestElev', 'TestElev@test.fi', '$2y$10$Xyp7Cc8BBLuFKe9ObZy1v.mGzDZqG2vrKwjcvqbeYI9pHiHhgrD0G', 1, 1280, 1, '2025-11-14 11:44:03'),
 (4, 'TestTeacher', 'Testteacher@test.fi', '$2a$12$KasIO3TzmDi6rvq01GT.4unnJbJ4rIQ4HlRLzGRDNk4O663Zha7Wa', 2, 0, 1, '2025-11-20 09:03:27'),
 (5, 'TestTeacher2', 'testteacher@2.fi', '$2a$12$X7KUnC3UcfSQIwWVtgqiQuyjKjnvqsayX/YYLlzGg2Rha9tdcRFH6', 2, 0, 2, '2025-11-20 09:51:20');
 
@@ -300,12 +309,16 @@ CREATE TABLE `user_results` (
 --
 
 INSERT INTO `user_results` (`Result_Id`, `User_Id`, `Exercise_Id`, `Score`, `Completed`, `Completed_At`) VALUES
-(27, 3, 9, 0, 1, '2025-12-02 12:53:48'),
-(28, 3, 9, 0, 1, '2025-12-02 13:09:49'),
-(29, 3, 9, 0, 1, '2025-12-02 13:10:07'),
-(30, 3, 9, 80, 1, '2025-12-02 13:10:50'),
-(31, 3, 10, 25, 1, '2025-12-02 13:22:57'),
-(32, 3, 11, 0, 0, '2025-12-02 13:28:39');
+(68, 3, 55, 25, 1, '2025-12-05 11:11:16'),
+(69, 3, 55, 0, 0, '2025-12-05 11:14:26'),
+(70, 3, 57, 0, 0, '2025-12-05 11:17:04'),
+(71, 3, 57, 0, 0, '2025-12-05 11:17:14'),
+(72, 3, 57, 0, 0, '2025-12-05 11:17:31'),
+(73, 3, 57, 0, 0, '2025-12-05 11:17:41'),
+(74, 3, 57, 0, 0, '2025-12-05 11:17:50'),
+(75, 3, 57, 30, 1, '2025-12-05 11:17:57'),
+(76, 3, 55, 0, 0, '2025-12-05 11:18:07'),
+(77, 3, 55, 0, 0, '2025-12-05 11:37:35');
 
 --
 -- Indexes for dumped tables
@@ -413,19 +426,19 @@ ALTER TABLE `class`
 -- AUTO_INCREMENT for table `class_exercises`
 --
 ALTER TABLE `class_exercises`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=54;
 
 --
 -- AUTO_INCREMENT for table `exercises`
 --
 ALTER TABLE `exercises`
-  MODIFY `Exercise_Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `Exercise_Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
 
 --
 -- AUTO_INCREMENT for table `exercise_questions`
 --
 ALTER TABLE `exercise_questions`
-  MODIFY `Question_Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
+  MODIFY `Question_Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=161;
 
 --
 -- AUTO_INCREMENT for table `experience_levels`
@@ -437,7 +450,7 @@ ALTER TABLE `experience_levels`
 -- AUTO_INCREMENT for table `question_options`
 --
 ALTER TABLE `question_options`
-  MODIFY `Option_Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `Option_Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=121;
 
 --
 -- AUTO_INCREMENT for table `roles`
@@ -461,7 +474,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `user_results`
 --
 ALTER TABLE `user_results`
-  MODIFY `Result_Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `Result_Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78;
 
 --
 -- Constraints for dumped tables
